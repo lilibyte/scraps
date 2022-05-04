@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# use a third-party service for obtaining your public IP address.
+# slow, principally insecure, but works in a pinch.
+# ----------------------------------------------------------------------------
+# PUBLIC_IP=`dig +short myip.opendns.com @resolver1.opendns.com`
+
+# use protonvpn-cli for obtaining status.
+# more info available, but requires a slow API request.
+# TODO: continue printing while remainder of motd prints, then update the
+# line using terminal control sequences.
+# ----------------------------------------------------------------------------
+echo -n "  Fetching VPN Status..."
+PVPN_STATUS=`protonvpn s`
+STATUS=`grep "Status: " <<< "$PVPN_STATUS" | cut -d " " -f8-`
+PUBLIC_IP=`grep "IP: " <<< "$PVPN_STATUS" | cut -d " " -f12-`
+CITY=`grep "City: " <<< "$PVPN_STATUS" | cut -d " " -f10-`
+COUNTRY=`grep "Country: " <<< "$PVPN_STATUS" | cut -d " " -f7-`
+VPN_INFO="($PUBLIC_IP, $CITY)"
+echo -n -e "\033[1K\033[1G"
+
+# check if there is an openvpn process running;  this is how the
+# protonvpn-cli checks if it's connected.
+# https://github.com/Rafficer/linux-cli-community/search?q=is_connected
+# also get the currently connected server from the pvpn-cli config file
+# ----------------------------------------------------------------------------
+# [ $(pgrep -x openvpn) > 0 ] && { STATUS="Connected"; true; } || STATUS="Disconnected"
+# SERVER=`cat $HOME/.pvpn-cli/pvpn-cli.cfg | grep "connected_server = " | cut -d " " -f3-`
+# VPN_INFO="($SERVER)"
+
+echo -e "  VPN.........: \033[1;32m$STATUS\033[0m $VPN_INFO"

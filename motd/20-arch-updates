@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# https://stackoverflow.com/a/34573844
+# https://stackoverflow.com/a/54538615
+CMD='echo $(($(checkupdates | wc -l) + $(yay -Qua | wc -l)))'
+PROG="$(basename $0)"
+EXPIRY=43200
+EXPIRE_DATE=$(date -Is -d "-$EXPIRY seconds")
+HASH=$(echo "$CMD" | md5sum | awk '{print $1}')
+CACHEDIR="${HOME}/.cache/${PROG}"
+mkdir -p "${CACHEDIR}"
+CACHEFILE="$CACHEDIR/$HASH"
+test -f "${CACHEFILE}" && [ $(expr $(date +%s) - $(date -r "$CACHEFILE" +%s)) -le $EXPIRY ] || eval "$CMD" > "${CACHEFILE}"
+echo -e "  Updates.....: \033[1;32m$(cat $CACHEFILE)\033[0m (pacman, aur)"
