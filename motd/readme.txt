@@ -9,6 +9,7 @@ Contents                                                            *contents*
          1. Arch Linux Updates .............. |20-arch-updates|
          2. VPN Status ...................... |20-vpn-status|
          3. rTorrent Status ................. |70-rtorrent-status|
+         4. Start Menu ...................... |100-start-menu|
 
 ==============================================================================
 1. Arch Linux Updates                                        *20-arch-updates*
@@ -43,7 +44,7 @@ TODO: clean up output formatting for VPN_INFO when the VPN is disconnected.
 
 >
     system status:
-	  VPN.........: Connected (192.0.2.0, City)
+      VPN.........: Connected (192.0.2.0, City)
 <
 
 ==============================================================================
@@ -82,4 +83,60 @@ need to handle this case.
 <
 
 ==============================================================================
-vim: tw=78 ft=help
+4. Start Menu                                                 *100-start-menu*
+
+Python script that modifies the cutie <https://github.com/kamik423/cutie>
+library to create a neat little start menu. As with the rest of the scripts
+in this directory, it's meant to be tinkered with and not necessarily used
+as-in. Depends on the `python-readchar` library.
+
+By default, if the keys `q` or `ESC` (probably have to hit it twice!) are
+input then the script will exit. If `CTRL-C` is input, then the screen is
+cleared and the script exists. The arrow keys or the Vim navigational keys
+(`j`, `k`) can be used to move the cursor up or down. Press `ENTER` to
+select the current item, and its associated command will be run through
+a system call.
+
+The `commands` dictionary can be updated as desired, but requires a specific
+formatting style:
+
+>
+    commands = {
+        "tmux": {
+            "caption": "  Restore Session....:",
+            "command": "tmux attach -t default || tmux new -s default",
+        },
+        "htop": {
+            "caption": "  Resource Monitor...:",
+            "command": "htop",
+        },
+        "iptraf": {
+            "caption": "  Network Monitor....:",
+            "command": "iptraf-ng"
+        },
+    }
+<
+
+Each dictionary key is the value that will show on the right side of the
+output that can be selected.
+
+The bash script that executes the Python script hides the cursor and shows
+it again once the menu exits. If this, or any other ANSI escape sequence
+used, is incompatible with your terminal the result may be unpredictable.
+
+The bash script calls the Python script assuming it's in the same working
+directory. Since this is probably not the case, make sure to update that
+line after moving the start_menu.py somewhere else!
+
+>
+    start menu:
+      Restore Session....: tmux
+      Resource Monitor...: htop
+      Network Monitor....: iptraf
+<
+
+(selection not visible in above example, but the currently selected item
+should be green with an underline: `printf '\33[4;32mexample\n\33[0m'`)
+
+==============================================================================
+vim: tw=78 ft=help et

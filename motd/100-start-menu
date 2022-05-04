@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo -e "\nstart menu:"
+printf "\e[?25l"
+python start_menu.py
+printf "\e[?25h"
