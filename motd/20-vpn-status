@@ -13,6 +13,10 @@
 echo -n "  Fetching VPN Status..."
 PVPN_STATUS=`protonvpn s`
 STATUS=`grep "Status: " <<< "$PVPN_STATUS" | cut -d " " -f8-`
+case "$STATUS" in
+	"Disconnected") STATUS="\033[1;31m$STATUS\033[0m" ;;
+	"Connected")    STATUS="\033[1;32m$STATUS\033[0m" ;;
+esac
 PUBLIC_IP=`grep "IP: " <<< "$PVPN_STATUS" | cut -d " " -f12-`
 CITY=`grep "City: " <<< "$PVPN_STATUS" | cut -d " " -f10-`
 COUNTRY=`grep "Country: " <<< "$PVPN_STATUS" | cut -d " " -f7-`
@@ -24,8 +28,8 @@ echo -n -e "\033[1K\033[1G"
 # https://github.com/Rafficer/linux-cli-community/search?q=is_connected
 # also get the currently connected server from the pvpn-cli config file
 # ----------------------------------------------------------------------------
-# [ $(pgrep -x openvpn) > 0 ] && { STATUS="Connected"; true; } || STATUS="Disconnected"
+# [ $(pgrep -x openvpn) > 0 ] && { STATUS="\033[1;32mConnected\033[0m"; true; } || STATUS="\033[1;31mDisconnected\033[0m"
 # SERVER=`cat $HOME/.pvpn-cli/pvpn-cli.cfg | grep "connected_server = " | cut -d " " -f3-`
 # VPN_INFO="($SERVER)"
 
-echo -e "  VPN.........: \033[1;32m$STATUS\033[0m $VPN_INFO"
+echo -e "  VPN.........: $STATUS $VPN_INFO"
