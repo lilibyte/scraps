@@ -8,6 +8,7 @@ Contents                                                            *contents*
 
          1. Arch Linux Updates .............. |20-arch-updates|
          2. VPN Status ...................... |20-vpn-status|
+         3. rTorrent Status ................. |70-rtorrent-status|
 
 ==============================================================================
 1. Arch Linux Updates                                        *20-arch-updates*
@@ -43,6 +44,41 @@ TODO: clean up output formatting for VPN_INFO when the VPN is disconnected.
 >
     system status:
 	  VPN.........: Connected (192.0.2.0, City)
+<
+
+==============================================================================
+3. rTorrent Status                                        *70-rtorrent-status*
+
+Shows some basic rTorrent stats using pyrocore's rtcontrol. Currently
+supports service uptime, total uploaded size, total downloaded size, average
+ratio, and number of actively uploading (seeding) torrents.
+
+As is, I would personally comment out these statistics except uptime and
+seeding.
+
+TODO: uptime format should match the system `uptime` command format.
+
+TODO: need to figure out how I can display uploaded, downloaded, and ratio
+stats relative to either 24 hours, or maybe since last login or something.
+Not sure yet if this will be possible with rtcontrol itself, might need
+a cron job and some scripting to do the math manually.
+
+TODO: find a better way to get uptime than the python cli
+
+TODO: consider using caching or something to speed this one up. could
+just run these as a script and cache them every 24 hours so they don't
+need to be run on login.
+
+TODO: what happens if rtorrent isn't running and these commands execute?
+need to handle this case.
+
+>
+    rtorrent status:
+      Uptime......: 20:52:55
+      Uploaded....: 360.25T (total)
+      Downloaded..: 2.05T (total)
+      Ratio.......: 157.00 (avg)
+      Seeding.....: 13 torrents
 <
 
 ==============================================================================

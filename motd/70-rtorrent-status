@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# commands that use awk for calculating some numeric column could have
+# alternatively used the --summary rtcontrol option. for example:
+# RATIO=`rtcontrol -qn ratio=+0 -o ratio --summary | grep "AVG" | cut -d " " -f1`
+
+# there's a better way to get the uptime using `rtxmlrpc convert.elapsed_time`,
+# but i don't know how it works:
+# https://github.com/pyroscope/pyrocore/blob/7e8fa2aa068a129dca284362a3c6ba037fd02436/docs/examples/rtuptime
+
+# TODO:
+# "For the loaded and completed fields to work, as well as the started,
+# leechtime and seedtime ones, you also have to add these commands":
+# https://pyrocore.readthedocs.io/en/latest/setup.html#extending-your-rtorrent-rc
+
+# these wouldn't work, because i dont think this is how the completed field
+# works, and because i needed to have made the above config change earlier.
+# UP_1D=`rtcontrol -qn ratio=+0 completed=+1d -o uploaded | awk '{ SUM += $1; LEN += 1 } END { print SUM }' | numfmt --invalid ignore --to iec --format "%.2f"`
+# RATIO_1D=`rtcontrol -qn ratio=+0 completed=+1d -o ratio | awk '{ SUM += $1; LEN += 1 } END { print SUM / LEN }'`
+
+echo -e "\nrtorrent status:"
+
+UPTIME=`python-pyrocore -c 'from pyrocore import connect; from sys import stdout; stdout.write(str(connect().uptime))' | date -u +%H:%M:%S`
+echo "  Uptime......: $UPTIME"
+
+UP_TOTAL=`rtcontrol -qn ratio=+0 -o uploaded | awk '{ SUM += $1; LEN += 1 } END { print SUM }' | numfmt --invalid ignore --to iec --format "%.2f"`
+echo -e "  Uploaded....: \033[1;32m$UP_TOTAL\033[0m (total)"
+
+DOWN_TOTAL=`rtcontrol -qn ratio=+0 -o size | awk '{ SUM += $1; LEN += 1 } END { print SUM }' | numfmt --invalid ignore --to iec --format "%.2f"`
+echo -e "  Downloaded..: \033[1;32m$DOWN_TOTAL\033[0m (total)"
+
+RATIO_AVG=`rtcontrol -qn ratio=+0 -o ratio | awk '{ SUM += $1; LEN += 1 } END { print SUM / LEN }' | numfmt --invalid ignore --to iec --format "%.2f"`
+echo -e "  Ratio.......: \033[1;32m$RATIO_AVG\033[0m (avg)"
+
+SEEDING_TOTAL=`rtcontrol -qn up=+0 -o uploaded | wc -l`
+echo -e "  Seeding.....: \033[1;32m$SEEDING_TOTAL\033[0m torrents"
+
+# list of incomplete downloads
+# DOWNLOADING=`rtcontrol is_complete=no -q -o name | awk '$0 !~ /.meta$/'`
